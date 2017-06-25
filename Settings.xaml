@@ -1,0 +1,362 @@
+﻿<Window x:Class="Shutdown7.Settings"
+		xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:extToolkit="http://schemas.microsoft.com/winfx/2006/xaml/presentation/toolkit/extended"
+		Title="&lt;Einstellungen&gt;" Icon="/Shutdown7;component/Resources/Shutdown7.ico" SizeToContent="WidthAndHeight" Closing="Window_Closing" ResizeMode="NoResize">
+	<Grid Margin="1" >
+		<StackPanel>
+			<TabControl>
+				<TabItem Header="Shutdown">
+					<StackPanel MinHeight="50">
+						<StackPanel.Resources>
+							<Style TargetType="{x:Type CheckBox}">
+								<Setter Property="Margin" Value="0,0,0,5"/>
+							</Style>
+						</StackPanel.Resources>
+						<CheckBox HorizontalAlignment="Left" Name="checkForce" VerticalAlignment="Top">
+							<CheckBox.ToolTip>
+								<ToolTip>
+									<StackPanel>
+										<TextBlock Name="TTHForce" FontWeight="Bold" />
+										<TextBlock Name="TTForce" />
+									</StackPanel>
+								</ToolTip>
+							</CheckBox.ToolTip>
+                        </CheckBox>
+                        <CheckBox HorizontalAlignment="Left" Name="checkHybrid" VerticalAlignment="Top">
+                            <CheckBox.ToolTip>
+                                <ToolTip>
+                                    <StackPanel>
+                                        <TextBlock Name="TTHHybrid" FontWeight="Bold" />
+                                        <TextBlock Name="TTHybrid" />
+                                    </StackPanel>
+                                </ToolTip>
+                            </CheckBox.ToolTip>
+                        </CheckBox>
+                        <CheckBox HorizontalAlignment="Left" Name="checkAsk" VerticalAlignment="Top">
+							<CheckBox.ToolTip>
+								<ToolTip>
+									<StackPanel>
+										<TextBlock Name="TTHAsk" FontWeight="Bold" />
+										<TextBlock Name="TTAsk" />
+									</StackPanel>
+								</ToolTip>
+							</CheckBox.ToolTip>
+						</CheckBox>
+                        <CheckBox HorizontalAlignment="Left" Name="checkStay" VerticalAlignment="Top">
+                            <CheckBox.ToolTip>
+                                <ToolTip>
+                                    <StackPanel>
+                                        <TextBlock Name="TTHStay" FontWeight="Bold" />
+                                        <TextBlock Name="TTStay" />
+                                    </StackPanel>
+                                </ToolTip>
+                            </CheckBox.ToolTip>
+                        </CheckBox>
+                        <CheckBox HorizontalAlignment="Left" Name="checkAllProcesses" VerticalAlignment="Top">
+							<CheckBox.ToolTip>
+								<ToolTip>
+									<StackPanel>
+										<TextBlock Name="TTHAllProcesses" FontWeight="Bold" />
+										<TextBlock Name="TTAllProcesses" />
+									</StackPanel>
+								</ToolTip>
+							</CheckBox.ToolTip>
+							</CheckBox>
+					</StackPanel>
+				</TabItem>
+
+                <TabItem Name="TabAppearance" Header="&lt;Appearance&gt;">
+					<StackPanel MinHeight="50">
+						<StackPanel.Resources>
+							<Style TargetType="{x:Type CheckBox}">
+								<Setter Property="Margin" Value="0,0,0,5"/>
+							</Style>
+						</StackPanel.Resources>
+                        
+						<CheckBox Content="Systrayicon" HorizontalAlignment="Left" Name="checkSystray" VerticalAlignment="Top">
+							<CheckBox.ToolTip>
+								<ToolTip>
+									<StackPanel>
+										<TextBlock Name="TTHSystray" FontWeight="Bold"></TextBlock>
+										<TextBlock Name="TTSystray" />
+									</StackPanel>
+								</ToolTip>
+							</CheckBox.ToolTip>
+                        </CheckBox>
+                        <CheckBox Content="&lt;Save WindowState&gt;" HorizontalAlignment="Left" Name="checkSaveWindowState" VerticalAlignment="Top">
+                            <CheckBox.ToolTip>
+                                <ToolTip>
+                                    <StackPanel>
+                                        <TextBlock Name="TTHSaveWindowState" FontWeight="Bold"></TextBlock>
+                                        <TextBlock Name="TTSaveWindowState" />
+                                    </StackPanel>
+                                </ToolTip>
+                            </CheckBox.ToolTip>
+                        </CheckBox>
+                        <CheckBox Content="&lt;ModusIcons&gt;" HorizontalAlignment="Left" Name="checkModusIcons" VerticalAlignment="Top">
+							<CheckBox.ToolTip>
+								<ToolTip>
+									<StackPanel>
+										<TextBlock Name="TTHModusIcons" FontWeight="Bold"></TextBlock>
+										<TextBlock Name="TTModusIcons" />
+									</StackPanel>
+								</ToolTip>
+							</CheckBox.ToolTip>
+						</CheckBox>
+						<CheckBox Content="Aero Glass" HorizontalAlignment="Left" Name="checkGlass" VerticalAlignment="Top" ToolTipService.ShowOnDisabled="True">
+							<CheckBox.ToolTip>
+								<ToolTip>
+									<StackPanel>
+										<TextBlock Name="TTHGlass" FontWeight="Bold" />
+										<TextBlock Name="TTGlass" />
+									</StackPanel>
+								</ToolTip>
+							</CheckBox.ToolTip>
+						</CheckBox>
+						<CheckBox Content="Overlayicon" HorizontalAlignment="Left" Name="checkOverlay" VerticalAlignment="Top" ToolTipService.ShowOnDisabled="True">
+							<CheckBox.ToolTip>
+								<ToolTip>
+									<StackPanel>
+										<TextBlock Name="TTHOverlay" FontWeight="Bold" />
+										<TextBlock Name="TTOverlay" />
+									</StackPanel>
+								</ToolTip>
+							</CheckBox.ToolTip>
+						</CheckBox>
+						<CheckBox Content="Jumplist" Name="checkJumplist" HorizontalAlignment="Left" VerticalAlignment="Top" ToolTipService.ShowOnDisabled="True">
+							<CheckBox.ToolTip>
+								<ToolTip>
+									<StackPanel>
+										<TextBlock Name="TTHJumplist" FontWeight="Bold" />
+										<TextBlock Name="TTJumplist" />
+									</StackPanel>
+								</ToolTip>
+							</CheckBox.ToolTip>
+						</CheckBox>
+						<CheckBox Content="Thumbnail Toolbar" Name="checkThumbnailToolbar" HorizontalAlignment="Left" VerticalAlignment="Top" ToolTipService.ShowOnDisabled="True">
+							<CheckBox.ToolTip>
+								<ToolTip>
+									<StackPanel>
+										<TextBlock Name="TTHThumbnailToolbar" FontWeight="Bold" />
+										<TextBlock Name="TTThumbnailToolbar" />
+									</StackPanel>
+								</ToolTip>
+							</CheckBox.ToolTip>
+						</CheckBox>
+					</StackPanel>
+				</TabItem>
+                <TabItem Name="TabWOSB" Header="&lt;WOSB&gt;">
+					<StackPanel MinHeight="50">
+						<StackPanel Orientation="Horizontal">
+							<CheckBox Name="checkWOSB" Click="checkWOSB_Click" ToolTipService.ShowOnDisabled="True">
+								<CheckBox.ToolTip>
+									<ToolTip>
+										<StackPanel>
+											<TextBlock Name="TTHWOSB" FontWeight="Bold" />
+											<TextBlock Name="TTWOSB" />
+										</StackPanel>
+									</ToolTip>
+								</CheckBox.ToolTip>
+							</CheckBox>
+							<Label Margin="3,0,0,0" Padding="0">
+								<Hyperlink Click="WOSB_Click" Style="{DynamicResource HyperStyle}">(Download)</Hyperlink>
+							</Label>
+						</StackPanel>
+						<Label />
+						<DockPanel Name="panelProfiles">
+							<Label Name="labelProfiles" Content="&lt;Profiles&gt;" Margin="0,0,2,0" />
+							<ComboBox Name="comboProfiles" Width="90" SelectionChanged="comboProfiles_SelectionChanged" Margin="0,0,1,0" />
+							<Button Name="buttonDeleteProfile" Content="&lt;Delete&gt;" Margin="0,0,5,0" Click="buttonDeleteProfile_Click" />
+							<TextBox Name="textNewProfile" Width="90" Margin="0,0,1,0" />
+							<Button Name="buttonAddProfile" Content="&lt;Add&gt;" Click="buttonAddProfile_Click" />
+						</DockPanel>
+						<GroupBox Name="labelWOSBTimes">
+							<StackPanel>
+								<Grid Name="gridWOSBTimes">
+									<Grid.ColumnDefinitions>
+										<ColumnDefinition Width="Auto" />
+										<ColumnDefinition Width="*" />
+										<ColumnDefinition Width="*" />
+										<ColumnDefinition Width="*" />
+										<ColumnDefinition Width="*" />
+									</Grid.ColumnDefinitions>
+									<Grid.RowDefinitions>
+										<RowDefinition Height="Auto" />
+										<RowDefinition Height="Auto" />
+										<RowDefinition Height="Auto" />
+										<RowDefinition Height="Auto" />
+										<RowDefinition Height="Auto" />
+										<RowDefinition Height="Auto" />
+										<RowDefinition Height="Auto" />
+									</Grid.RowDefinitions>
+									<Label Name="labelWOSBDay1" Grid.Column="0" Grid.Row="0" />
+									<Label Name="labelWOSBDay2" Grid.Column="0" Grid.Row="1" />
+									<Label Name="labelWOSBDay3" Grid.Column="0" Grid.Row="2" />
+									<Label Name="labelWOSBDay4" Grid.Column="0" Grid.Row="3" />
+									<Label Name="labelWOSBDay5" Grid.Column="0" Grid.Row="4" />
+									<Label Name="labelWOSBDay6" Grid.Column="0" Grid.Row="5" />
+									<Label Name="labelWOSBDay7" Grid.Column="0" Grid.Row="6" />
+									<extToolkit:DateTimeUpDown Name="textWOSBTimeMo1" Format="LongTime" Margin="0,1,1,1" Grid.Column="1" HorizontalAlignment="Right" Width="81" />
+									<extToolkit:DateTimeUpDown Name="textWOSBTimeMo2" Format="LongTime" Margin="1" Grid.Column="2" Grid.Row="0" />
+									<extToolkit:DateTimeUpDown Name="textWOSBTimeMo3" Format="LongTime" Margin="1" Grid.Column="3" Grid.Row="0" />
+									<extToolkit:DateTimeUpDown Name="textWOSBTimeMo4" Format="LongTime" Margin="1" Grid.Column="4" Grid.Row="0" />
+									<extToolkit:DateTimeUpDown Name="textWOSBTimeTu1" Format="LongTime" Margin="1" Grid.Column="1" Grid.Row="1" />
+									<extToolkit:DateTimeUpDown Name="textWOSBTimeTu2" Format="LongTime" Margin="1" Grid.Column="2" Grid.Row="1" />
+									<extToolkit:DateTimeUpDown Name="textWOSBTimeTu3" Format="LongTime" Margin="1" Grid.Column="3" Grid.Row="1" />
+									<extToolkit:DateTimeUpDown Name="textWOSBTimeTu4" Format="LongTime" Margin="1" Grid.Column="4" Grid.Row="1" />
+									<extToolkit:DateTimeUpDown Name="textWOSBTimeWe1" Format="LongTime" Margin="1" Grid.Column="1" Grid.Row="2" />
+									<extToolkit:DateTimeUpDown Name="textWOSBTimeWe2" Format="LongTime" Margin="1" Grid.Column="2" Grid.Row="2" />
+									<extToolkit:DateTimeUpDown Name="textWOSBTimeWe3" Format="LongTime" Margin="1" Grid.Column="3" Grid.Row="2" />
+									<extToolkit:DateTimeUpDown Name="textWOSBTimeWe4" Format="LongTime" Margin="1" Grid.Column="4" Grid.Row="2" />
+									<extToolkit:DateTimeUpDown Name="textWOSBTimeTh1" Format="LongTime" Margin="1" Grid.Column="1" Grid.Row="3" />
+									<extToolkit:DateTimeUpDown Name="textWOSBTimeTh2" Format="LongTime" Margin="1" Grid.Column="2" Grid.Row="3" />
+									<extToolkit:DateTimeUpDown Name="textWOSBTimeTh3" Format="LongTime" Margin="1" Grid.Column="3" Grid.Row="3" />
+									<extToolkit:DateTimeUpDown Name="textWOSBTimeTh4" Format="LongTime" Margin="1" Grid.Column="4" Grid.Row="3" />
+									<extToolkit:DateTimeUpDown Name="textWOSBTimeFr1" Format="LongTime" Margin="1" Grid.Column="1" Grid.Row="4" />
+									<extToolkit:DateTimeUpDown Name="textWOSBTimeFr2" Format="LongTime" Margin="1" Grid.Column="2" Grid.Row="4" />
+									<extToolkit:DateTimeUpDown Name="textWOSBTimeFr3" Format="LongTime" Margin="1" Grid.Column="3" Grid.Row="4" />
+									<extToolkit:DateTimeUpDown Name="textWOSBTimeFr4" Format="LongTime" Margin="1" Grid.Column="4" Grid.Row="4" />
+									<extToolkit:DateTimeUpDown Name="textWOSBTimeSa1" Format="LongTime" Margin="1" Grid.Column="1" Grid.Row="5" />
+									<extToolkit:DateTimeUpDown Name="textWOSBTimeSa2" Format="LongTime" Margin="1" Grid.Column="2" Grid.Row="5" />
+									<extToolkit:DateTimeUpDown Name="textWOSBTimeSa3" Format="LongTime" Margin="1" Grid.Column="3" Grid.Row="5" />
+									<extToolkit:DateTimeUpDown Name="textWOSBTimeSa4" Format="LongTime" Margin="1" Grid.Column="4" Grid.Row="5" />
+									<extToolkit:DateTimeUpDown Name="textWOSBTimeSu1" Format="LongTime" Margin="1" Grid.Column="1" Grid.Row="6" />
+									<extToolkit:DateTimeUpDown Name="textWOSBTimeSu2" Format="LongTime" Margin="1" Grid.Column="2" Grid.Row="6" />
+									<extToolkit:DateTimeUpDown Name="textWOSBTimeSu3" Format="LongTime" Margin="1" Grid.Column="3" Grid.Row="6" />
+									<extToolkit:DateTimeUpDown Name="textWOSBTimeSu4" Format="LongTime" Margin="1" Grid.Column="4" Grid.Row="6" />
+								</Grid>
+								<Label />
+								<DockPanel Width="379">
+									<StackPanel>
+										<Label Name="labelWOSBProg1" />
+										<Label Name="labelWOSBArgs1" />
+										<Label Name="labelWOSBProg2" />
+										<Label Name="labelWOSBArgs2" />
+										<Label Name="labelWOSBExtra" />
+									</StackPanel>
+									<StackPanel>
+										<DockPanel>
+											<Button Name="buttonWOSBProg1" Click="buttonWOSBProg1_Click" DockPanel.Dock="Right" />
+											<TextBox Name="textWOSBProg1" IsReadOnly="True" Height="26" />
+										</DockPanel>
+										<TextBox Name="textWOSBArgs1" Height="26" />
+										<DockPanel>
+											<Button Name="buttonWOSBProg2" Click="buttonWOSBProg2_Click" DockPanel.Dock="Right" />
+											<TextBox Name="textWOSBProg2" IsReadOnly="True" Height="26"/>
+										</DockPanel>
+										<TextBox Name="textWOSBArgs2" Height="26" />
+										<TextBox Name="textWOSBExtra" Height="26" />
+									</StackPanel>
+								</DockPanel>
+							</StackPanel>
+						</GroupBox>
+					</StackPanel>
+				</TabItem>
+				<TabItem Header="Remote-Shutdown">
+					<StackPanel MinHeight="50">
+						<StackPanel.Resources>
+							<Style TargetType="{x:Type CheckBox}">
+								<Setter Property="Margin" Value="0,0,0,5"/>
+							</Style>
+							<Style TargetType="{x:Type ComboBox}">
+								<Setter Property="Margin" Value="0,0,0,5"/>
+							</Style>
+							<Style TargetType="{x:Type Label}">
+								<Setter Property="Margin" Value="0,0,0,5"/>
+							</Style>
+							<Style TargetType="{x:Type Button}">
+								<Setter Property="Margin" Value="0,0,0,5"/>
+							</Style>
+							<Style TargetType="{x:Type PasswordBox}">
+								<Setter Property="Margin" Value="0,0,0,5"/>
+							</Style>
+						</StackPanel.Resources>
+						<CheckBox Content="Client" Name="checkRemoteClient" Checked="checkRemoteClient_Checked" Unchecked="checkRemoteClient_Unchecked">
+							<CheckBox.ToolTip>
+								<ToolTip>
+									<StackPanel>
+										<TextBlock Name="TTHRemoteClient" FontWeight="Bold" />
+										<TextBlock Name="TTRemoteClient" />
+									</StackPanel>
+								</ToolTip>
+							</CheckBox.ToolTip>
+						</CheckBox>
+						<CheckBox Content="Server" Name="checkRemoteServer" Checked="checkRemoteServer_Checked" Unchecked="checkRemoteServer_Unchecked">
+							<CheckBox.ToolTip>
+								<ToolTip>
+									<StackPanel>
+										<TextBlock Name="TTHRemoteServer" FontWeight="Bold" />
+										<TextBlock Name="TTRemoteServer" />
+									</StackPanel>
+								</ToolTip>
+							</CheckBox.ToolTip>
+						</CheckBox>
+						<CheckBox Content="WakeOnLan" Name="checkWakeOnLan">
+							<CheckBox.ToolTip>
+								<ToolTip>
+									<StackPanel>
+										<TextBlock Name="TTHWakeOnLan" FontWeight="Bold" />
+										<TextBlock Name="TTWakeOnLan" />
+									</StackPanel>
+								</ToolTip>
+							</CheckBox.ToolTip>
+						</CheckBox>
+						<CheckBox Content="&lt;IPv4&gt;" Name="checkIPv4">
+							<CheckBox.ToolTip>
+								<ToolTip>
+									<StackPanel>
+										<TextBlock Name="TTHIPv4" FontWeight="Bold" />
+										<TextBlock Name="TTIPv4" />
+									</StackPanel>
+								</ToolTip>
+							</CheckBox.ToolTip>
+						</CheckBox>
+						<StackPanel Orientation="Horizontal">
+							<Label Content="Port:" Name="labelRemotePort" />
+							<ComboBox Name="textRemotePort" Width="59" IsEditable="True" />
+						</StackPanel>
+						<StackPanel Orientation="Horizontal">
+							<Label Content="Passwort:" Name="labelRemotePassword"/>
+							<PasswordBox Name="textRemotePassword" Width="242" LostKeyboardFocus="textRemotePassword_LostKeyboardFocus" GotKeyboardFocus="textRemotePassword_GotKeyboardFocus" />
+						</StackPanel>
+						<StackPanel Orientation="Horizontal">
+							<Button Content="&lt;Portweiterleitung testen&gt;" Margin="3" Name="buttonPortCheck" Click="buttonPortCheck_Click" />
+							<Button Content="&lt;Windows Firewallausnahme&gt;" Margin="3" Name="buttonFirewallException"  Click="buttonFirewallException_Click" />
+						</StackPanel>
+					</StackPanel>
+				</TabItem>
+                <TabItem Name="TabMiscellaneous" Header="&lt;Miscellaneous&gt;">
+					<StackPanel MinHeight="50">
+						<CheckBox Content="Autostart" HorizontalAlignment="Left" Name="checkAutostart" VerticalAlignment="Top">
+							<CheckBox.ToolTip>
+								<ToolTip>
+									<StackPanel>
+										<TextBlock Name="TTHAutostart" FontWeight="Bold" />
+										<TextBlock Name="TTAutostart" />
+									</StackPanel>
+								</ToolTip>
+							</CheckBox.ToolTip>
+						</CheckBox>
+						<CheckBox Content="" Name="checkSendFeedback">
+							<CheckBox.ToolTip>
+								<ToolTip>
+									<StackPanel>
+										<TextBlock Name="TTHSendFeedback" FontWeight="Bold" />
+										<TextBlock Name="TTSendFeedback" />
+									</StackPanel>
+								</ToolTip>
+							</CheckBox.ToolTip>
+						</CheckBox>
+					</StackPanel>
+				</TabItem>
+			</TabControl>
+			<Label Name="labelRestart" FontSize="11" Padding="0" />
+			<StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom">
+				<Button Content="OK" Name="OKButton" Width="77" Click="OKButton_Click" Margin="3" />
+				<Button Content=" " Name="AbortButton" Width="77" Click="AbortButton_Click" Margin="3" />
+				<Button Content=" " Name="ApplyButton" Width="77" Click="ApplyButton_Click" Margin="3" />
+			</StackPanel>
+		</StackPanel>
+	</Grid>
+</Window>

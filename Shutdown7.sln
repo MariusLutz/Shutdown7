@@ -1,0 +1,23 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shutdown7", "Shutdown7.csproj", "{B08D8EAF-7EC5-4776-BB38-E71810341FBC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B08D8EAF-7EC5-4776-BB38-E71810341FBC}.Debug|x86.ActiveCfg = Debug|x86
+		{B08D8EAF-7EC5-4776-BB38-E71810341FBC}.Debug|x86.Build.0 = Debug|x86
+		{B08D8EAF-7EC5-4776-BB38-E71810341FBC}.Release|x86.ActiveCfg = Release|x86
+		{B08D8EAF-7EC5-4776-BB38-E71810341FBC}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(SharpSetup) = preSolution
+		Version = 1.2
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,178 @@
+﻿<Window x:Class="Shutdown7.MainWindow"
+		xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:extToolkit="http://schemas.microsoft.com/winfx/2006/xaml/presentation/toolkit/extended"
+        xmlns:Properties="clr-namespace:Shutdown7.Properties"
+        
+		Name="Main" Title="Shutdown7" Icon="/Shutdown7;component/Resources/Shutdown7.ico"
+		SizeToContent="WidthAndHeight" ResizeMode="CanMinimize" MinWidth="250"
+		ContentRendered="Main_ContentRendered" Initialized="Main_Initialized"
+        WindowState="{Binding WindowState, Source={x:Static Properties:Settings.Default}, Mode=TwoWay}"
+        Left="{Binding WindowLeft, Source={x:Static Properties:Settings.Default}, Mode=TwoWay}"
+        Top="{Binding WindowTop, Source={x:Static Properties:Settings.Default}, Mode=TwoWay}"
+        >
+    <Grid Margin="2">
+		<StackPanel Margin="0,0,0,20">
+			<ComboBox Name="comboModus">
+				<ComboBox.ItemTemplate>
+					<DataTemplate>
+						<StackPanel Orientation="Horizontal" >
+							<Image Source="{Binding Image}" MaxWidth="16" MaxHeight="16" Margin="0,0,2,0" />
+							<TextBlock Text="{Binding Text}" />
+						</StackPanel>
+					</DataTemplate>
+				</ComboBox.ItemTemplate>
+			</ComboBox>
+			<TextBox Name="Modus" Text="{Binding ElementName=comboModus, Path=SelectedItem.Text}" Visibility="Collapsed" TextChanged="Modus_TextChanged" />
+			<StackPanel Name="stackLaunchFile" Visibility="Collapsed">
+				<TextBox Name="textLaunchFile" IsReadOnly="True" AllowDrop="True" TextChanged="textLaunchFile_TextChanged" PreviewDragEnter="textDeleteFile_PreviewDragEnter" PreviewDragOver="textDeleteFile_PreviewDragEnter" PreviewDrop="textDeleteFile_PreviewDrop" />
+				<StackPanel Orientation="Horizontal">
+					<Button Name="buttonBrowseLaunchFile" Content="" Width="99" Click="buttonBrowseLaunchFile_Click" />
+					<Button Name="buttonDeleteLaunchFile" Content="" Width="99" IsEnabled="False" Click="buttonDeleteLaunchFile_Click" />
+				</StackPanel>
+			</StackPanel>
+			<Expander Header="&lt;Mode&gt;" Name="expanderMode" IsExpanded="True">
+                <StackPanel>
+                    <!--IsChecked="True"-->
+                    <RadioButton Content="&lt;Now&gt;" Name="radioNow" Checked="radioNow_Checked" />
+					<RadioButton Content="&lt;Time&gt;" Name="radioTime" Checked="radioTime_Checked" />
+					<RadioButton Content="&lt;Process&gt;" Name="radioProcessClose" Checked="radioProcess_Checked" />
+					<RadioButton Content="&lt;FileDelete&gt;" Name="radioFileDelete" Checked="radioFile_Checked" />
+					<RadioButton Content="&lt;Music&gt;" Name="radioPlayMusic" Checked="radioMusic_Checked" />
+					<RadioButton Content="&lt;Idle&gt;" Name="radioIdle" Checked="radioIdle_Checked" />
+					<RadioButton Content="&lt;Cpu&gt;" Name="radioCpu" Checked="radioCpu_Checked" />
+					<RadioButton Content="&lt;Network&gt;" Name="radioNetwork" Checked="radioNetwork_Checked" Visibility="Collapsed" />
+
+					<StackPanel Name="stackTime" Orientation="Horizontal" Visibility="Collapsed">
+						<extToolkit:IntegerUpDown Name="hh" Width="42" Height="23" Minimum="0" Maximum="23" Watermark="h" />
+						<!--<TextBox Height="23" Width="35" Name="hh" Text="00" MaxLength="2" PreviewTextInput="hh_PreviewTextInput" KeyUp="hh_KeyUp" />-->
+						<Label Content=":" />
+						<extToolkit:IntegerUpDown Name="mm" Width="42" Height="23" Minimum="0" Maximum="59" Watermark="m" />
+						<!--<TextBox Height="23" Width="35" Name="mm" Text="00" MaxLength="2" PreviewTextInput="mm_PreviewTextInput" KeyUp="mm_KeyUp" />-->
+						<Label Content=":" />
+						<extToolkit:IntegerUpDown Name="ss" Width="42" Height="23" Minimum="0" Maximum="59" Watermark="s" />
+						<!--<TextBox Height="23" Width="35" Name="ss" Text="00" MaxLength="2" PreviewTextInput="ss_PreviewTextInput" KeyUp="ss_KeyUp" />-->
+					<StackPanel Margin="3,0,0,0">
+							<RadioButton Content="&lt;At&gt;" Name="At" Checked="At_Checked" />
+							<RadioButton Content="&lt;In&gt;" Name="In" IsChecked="True" Checked="In_Checked" />
+						</StackPanel>
+					</StackPanel>
+					<StackPanel Name="stackFile" Visibility="Collapsed">
+						<TextBox Name="textDeleteFile" IsReadOnly="True" AllowDrop="True" TextChanged="textDeleteFile_TextChanged" PreviewDragEnter="textDeleteFile_PreviewDragEnter" PreviewDragOver="textDeleteFile_PreviewDragEnter" PreviewDrop="textDeleteFile_PreviewDrop" />
+						<StackPanel Orientation="Horizontal">
+							<Button Name="buttonBrowseDeleteFile" Content="" Width="99" Click="buttonBrowseDeleteFile_Click" />
+							<Button Name="buttonDeleteDeleteFile" Content="" Width="99" IsEnabled="False" Click="buttonDeleteDeleteFile_Click" />
+						</StackPanel>
+					</StackPanel>
+					<StackPanel Name="stackProcess" Visibility="Collapsed">
+						<ComboBox Name="comboProcesses" SelectionChanged="comboProcesses_SelectionChanged" />
+					</StackPanel>
+					<StackPanel Name="stackMusic" Visibility="Collapsed">
+						<ScrollViewer Name="scrollMusicFiles" VerticalScrollBarVisibility="Auto">
+							<ListBox Name="listMusicFiles" Visibility="Collapsed" SelectionChanged="listMusicFiles_SelectionChanged" />
+						</ScrollViewer>
+						<StackPanel Orientation="Horizontal">
+							<Button Name="buttonBrowseMusicFile" Content="&lt;Browse&gt;" Width="74" Click="buttonBrowseMusicFile_Click" />
+							<Button Name="buttonDeleteMusicFile" Content="&lt;Delete&gt;" Width="74" IsEnabled="False" Click="buttonDeleteMusicFile_Click" />
+							<Button Name="buttonUpMusicFile" Content="▲" Width="25" IsEnabled="False" Click="buttonUpMusicFile_Click" />
+							<Button Name="buttonDownMusicFile" Content="▼" Width="25" IsEnabled="False" Click="buttonDownMusicFile_Click" />
+						</StackPanel>
+					</StackPanel>
+					<StackPanel Name="stackCpu" Orientation="Horizontal" Visibility="Collapsed">
+						<ComboBox Name="comboCpu" Margin="0,0,4,0" SelectedIndex="0" Height="22" />
+						<extToolkit:IntegerUpDown Name="cpu" Width="42" Height="23" Minimum="0" Maximum="100" Watermark="" Value="90" />
+						<Label Content="%" />
+					</StackPanel>
+					<StackPanel Name="stackNetwork" Orientation="Vertical" Visibility="Collapsed">
+						<ComboBox Name="comboNetworkAdapters" Margin="0,0,4,0" SelectedIndex="0" Height="22" />
+						<StackPanel Orientation="Horizontal">
+							<ComboBox Name="comboNetwork" Margin="0,0,4,0" SelectedIndex="0" Height="22" />
+							<Label Content="&lt;" Name="labelNetworkBelow" />
+							<extToolkit:IntegerUpDown Name="network" Width="42" Height="23" Minimum="1" Maximum="1000" Watermark="" Value="1" />
+							<Label Content="kbps" />
+						</StackPanel>
+					</StackPanel>
+				</StackPanel>
+			</Expander>
+			<Expander Header="Remote" Name="expanderRemote" Expanded="expanderRemote_Expanded" Collapsed="expanderRemote_Collapsed" Visibility="Collapsed">
+				<StackPanel>
+					<StackPanel Orientation="Horizontal">
+						<Label Content="Server:" Name="labelRemoteServer" />
+						<ComboBox Name="textRemoteServer" IsEditable="True" Width="152" />
+						<TextBox Text="{Binding ElementName=textRemoteServer, Path=Text}" TextChanged="textRemoteServerPortMac_TextChanged" Visibility="Collapsed" />
+					</StackPanel>
+					<StackPanel Orientation="Horizontal">
+						<Label Content="Port:" Name="labelRemotePort" />
+						<ComboBox Name="textRemotePort" Width="163" IsEditable="True" PreviewTextInput="textRemotePort_PreviewTextInput">
+							<ComboBoxItem Content="5556" IsSelected="True" />
+							<ComboBoxItem Content="8080" />
+							<ComboBoxItem Content="80" />
+						</ComboBox>
+						<TextBox Text="{Binding ElementName=textRemotePort, Path=Text}" TextChanged="textRemoteServerPortMac_TextChanged" Visibility="Collapsed" />
+					</StackPanel>
+					<StackPanel Orientation="Horizontal">
+						<Label Content="Mac: " Name="labelRemoteMac" Visibility="Collapsed" />
+						<ComboBox Name="textRemoteMac" IsEditable="True" Width="160" Visibility="Collapsed" />
+						<TextBox Text="{Binding ElementName=textRemoteMac, Path=Text}" TextChanged="textRemoteServerPortMac_TextChanged" Visibility="Collapsed" />
+					</StackPanel>
+					<StackPanel Orientation="Horizontal">
+						<Label Content="" Name="labelRemotePassword" />
+						<PasswordBox Name="textRemotePassword" Width="135" PasswordChanged="textRemotePassword_PasswordChanged" />
+					</StackPanel>
+				</StackPanel>
+			</Expander>
+			<Expander Header="&lt;Settings&gt;" Name="expanderSettings">
+                <StackPanel>
+                    <CheckBox Content="&lt;Resume Last Action&gt;" Name="checkResumeLastAction" Checked="checkResumeLastAction_Checked" />
+                    <Separator />
+                    <CheckBox Content="&lt;Screen Off&gt;" Name="checkScreenOff" />
+					<Separator />
+					<CheckBox Content="&lt;Play Noise&gt;" Name="checkPlayNoise" IsEnabled="False" Checked="checkPlayNoise_Checked" Unchecked="checkPlayNoise_Unchecked" />
+					<Label Name="labelOrgVol" Content="&lt;Org Volume&gt;" Padding="5, 2, 5, 2" />
+					<StackPanel Name="stackMusicVol" Orientation="Horizontal" IsEnabled="False">
+						<Label Name="labelOrgVolSlider" Content="  XX %" />
+						<Slider Name="sliderOrgVol" Width="155" Minimum="20" Maximum="100" Value="80" ValueChanged="sliderOrgVol_ValueChanged" IsSnapToTickEnabled="True" TickPlacement="BottomRight" TickFrequency="20" />
+					</StackPanel>
+					<CheckBox Content="&lt;Music Fadeout&gt;" Name="checkMusicFadeout" IsEnabled="False" Checked="checkMusicFadeout_Checked" Unchecked="checkMusicFadeout_Unchecked" />
+					<StackPanel Name="stackMusicFadeout" Visibility="Collapsed">
+						<Label Name="labelFade" Content="&lt;Fade Start&gt;" HorizontalAlignment="Left" Padding="5, 5, 5, 2" />
+						<StackPanel Orientation="Horizontal">
+							<Label Name="labelFadeSlider" Content="XX %" HorizontalAlignment="Left" />
+							<Slider Name="sliderFade" Width="160" Minimum="0" Maximum="95" Value="60" ValueChanged="sliderFade_ValueChanged" IsSnapToTickEnabled="True" TickPlacement="BottomRight" TickFrequency="30" />
+						</StackPanel>
+						<Label Name="labelEndVol" Content="&lt;End Volume&gt;" HorizontalAlignment="Left" Padding="5, 5, 5, 2" />
+						<StackPanel Orientation="Horizontal">
+							<Label Name="labelEndVolSlider" Content="  0 %" HorizontalAlignment="Right" />
+							<Slider Name="sliderEndVol" Width="160" Minimum="0" Maximum="80" Value="0" ValueChanged="sliderEndVol_ValueChanged" IsSnapToTickEnabled="True" TickPlacement="BottomRight" TickFrequency="20" />
+						</StackPanel>
+						<Canvas Name="canvasMusicFadeout" Height="50" Width="196" Margin="2">
+							<Line X1="0" Y1="0" X2="0" Y2="{Binding RelativeSource={RelativeSource Self}, Path=Parent.ActualHeight}" Stroke="Black" StrokeThickness="1.5" />
+							<Line X1="0" Y1="{Binding RelativeSource={RelativeSource Self}, Path=Parent.ActualHeight}" X2="{Binding RelativeSource={RelativeSource Self}, Path=Parent.ActualWidth}" Y2="{Binding RelativeSource={RelativeSource Self}, Path=Parent.ActualHeight}" Stroke="Black" StrokeThickness="1"/>
+							<Polygon Name="polygonMusicFadeout">
+								<Polygon.Fill>
+									<SolidColorBrush Color="LightSteelBlue" Opacity="0.4"/>
+								</Polygon.Fill>
+							</Polygon>
+						</Canvas>
+					</StackPanel>
+				</StackPanel>
+			</Expander>
+			<ProgressBar Height="25" HorizontalAlignment="Stretch"  Name="progressBar" />
+			<Label Name="labelStatus" Margin="0,-26,0,0" HorizontalAlignment="Center" />
+			<Button Height="37" Name="GoButton" VerticalAlignment="Top" Content="GO!" FontWeight="Bold" FontSize="15" Margin="0,5,0,0" Click="GoButton_Click" IsEnabled="False" IsDefault="True"></Button>
+		</StackPanel>
+		<Label Padding="2" HorizontalAlignment="Left" Name="UpdateLabel" VerticalAlignment="Bottom">
+			<Hyperlink Click="Updates_Click" Style="{DynamicResource HyperStyle}">Updates</Hyperlink>
+		</Label>
+		<Label Padding="2" HorizontalAlignment="Center" VerticalAlignment="Bottom">
+			<Hyperlink Click="Settings_Click" Style="{DynamicResource HyperStyle}">
+				<TextBlock Text="&lt;Settings&gt;" Name="SettingsLabel" HorizontalAlignment="Center"></TextBlock>
+			</Hyperlink>
+		</Label>
+		<Label Padding="2" HorizontalAlignment="Right" Margin="0,0,0,0" Name="AboutLabel" VerticalAlignment="Bottom">
+			<Hyperlink Click="About_Click" Style="{DynamicResource HyperStyle}">About</Hyperlink>
+		</Label>
+		
+	</Grid>
+</Window>
+

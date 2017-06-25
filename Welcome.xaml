@@ -1,0 +1,206 @@
+﻿<Window x:Class="Shutdown7.Welcome"
+		xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		Title="Shutdown7" ResizeMode="CanMinimize" Icon="/Shutdown7;component/Resources/Shutdown7.ico"
+		MinHeight="350" Width="560" Closing="Window_Closing" SizeToContent="Height">
+	<Grid Margin="4">
+		<StackPanel>
+			<StackPanel>
+				<Label>
+					<TextBlock Text="&lt;Title&gt;" Name="labelTitle" FontSize="16">
+						  <TextBlock.TextDecorations>
+							<TextDecorationCollection>
+							  <TextDecoration PenThicknessUnit="FontRecommended">
+								<TextDecoration.Pen>
+								  <Pen Thickness="1.5" Brush="#FF0079F4"></Pen>
+								</TextDecoration.Pen>
+							  </TextDecoration>
+							</TextDecorationCollection>
+						  </TextBlock.TextDecorations>
+					</TextBlock>
+				</Label>
+				<Label>
+					<TextBlock Name="labelInstruction" Text="&lt;Instruction&gt;" FontSize="14" TextWrapping="Wrap" />
+				</Label>
+			</StackPanel>
+
+			<StackPanel Name="stackStep1">
+				
+			</StackPanel>
+
+			<StackPanel Name="stackStep2" Visibility="Collapsed">
+				<CheckBox Content="&lt;Autostart&gt;" Name="checkAutostart" />
+				<Label Padding="0">
+					<TextBlock Name="TTAutostart" Style="{StaticResource Description}" />
+				</Label>
+			</StackPanel>
+
+			<StackPanel Name="stackStep3" Visibility="Collapsed">
+				<!--<CheckBox Name="checkAsk" />
+				<Label Padding="0">
+					<TextBlock Name="TTAsk" Style="{StaticResource Description}" />
+				</Label>-->
+				<CheckBox Name="checkStayAfterShutdown" />
+				<Label Padding="0">
+					<TextBlock Name="TTStayAfterShutdown" Style="{StaticResource Description}" />
+				</Label>
+				<Label />
+				<CheckBox Name="checkForce" />
+				<Label Padding="0">
+					<TextBlock Name="TTForce" Style="{StaticResource Description}" />
+				</Label>
+				<Label />
+				<CheckBox Content="Systray-Icon" Name="checkSysicon" />
+				<Label Padding="0">
+					<TextBlock Name="TTSysicon" Style="{StaticResource Description}" />
+				</Label>
+			</StackPanel>
+
+			<StackPanel Name="stackStep4" Visibility="Collapsed">
+				<CheckBox Name="checkPinTaskbar" />
+				<Label Padding="0">
+					<TextBlock Name="TTPinTaskbar" Style="{StaticResource Description}" />
+				</Label>
+				<Label />
+				<CheckBox Content="Jumplist" Name="checkJumplist" />
+				<Label Padding="0">
+					<TextBlock Name="TTJumplist" Style="{StaticResource Description}" />
+				</Label>
+				<Label />
+				<CheckBox Content="Overlay-Icons" Name="checkOverlay" />
+				<Label Padding="0">
+					<TextBlock Name="TTOverlay" Style="{StaticResource Description}" />
+				</Label>
+				<Label />
+				<!--<CheckBox Content="Aero Glass" Name="checkGlass" />
+				<Label Padding="0">
+					<TextBlock Name="TTGlass" Style="{StaticResource Description}" />
+				</Label>-->
+			</StackPanel>
+
+			<StackPanel Name="stackStep5" Visibility="Collapsed">
+				<CheckBox Name="checkRemoteClient" />
+				<Label Padding="0">
+					<TextBlock Name="TTRemoteClient" Style="{StaticResource Description}" />
+				</Label>
+				<Label />
+				<CheckBox Name="checkRemoteServer" />
+				<Label Padding="0">
+					<TextBlock Name="TTRemoteServer" Style="{StaticResource Description}" />
+				</Label>
+			</StackPanel>
+
+			<StackPanel Name="stackStep6" Visibility="Collapsed">
+				<StackPanel Orientation="Horizontal">
+					<Label Content="Port:" Name="labelRemotePort" />
+					<ComboBox Name="textRemotePort" IsEditable="True" PreviewTextInput="textRemotePort_PreviewTextInput" Padding="6,6,0,0" SelectionChanged="textRemotePort_SelectionChanged">
+						<ComboBoxItem Content="5556" IsSelected="True" />
+						<ComboBoxItem Content="8080" />
+						<ComboBoxItem Content="80" />
+					</ComboBox>
+				</StackPanel>
+				<Label Padding="0">
+					<TextBlock Name="TTRemotePort" Style="{StaticResource Description}"  />
+				</Label>
+				<Label />
+				<StackPanel Orientation="Horizontal">
+					<Label Name="labelRemotePassword" />
+					<PasswordBox Name="textRemotePassword" Width="200" GotKeyboardFocus="textRemotePassword_GotKeyboardFocus" PasswordChanged="textRemotePassword_PasswordChanged" />
+				</StackPanel>
+				<Label Padding="0">
+					<TextBlock Name="TTRemotePassword" Style="{StaticResource Description}" />
+				</Label>
+				<Label />
+				<StackPanel Orientation="Horizontal">
+					<Button Content="&lt;Portweiterleitung testen&gt;" Margin="3" Name="buttonPortCheck" Click="buttonPortCheck_Click" />
+					<Button Content="&lt;Windows Firewallausnahme&gt;" Margin="3" Name="buttonFirewallException"  Click="buttonFirewallException_Click" />
+				</StackPanel>
+			</StackPanel>
+
+			<StackPanel Name="stackStep7" Visibility="Collapsed">
+				<CheckBox Name="checkWOSB" />
+				<StackPanel Orientation="Horizontal">
+					<Button HorizontalAlignment="Left" Name="buttonDownloadWOSB" Click="buttonDownloadWOSB_Click" />
+					<Button HorizontalAlignment="Left" Name="buttonCheckWOSB" Click="buttonCheckWOSB_Click" />
+				</StackPanel>
+			</StackPanel>
+
+			<StackPanel Name="stackStep8" Visibility="Collapsed">
+				<StackPanel Orientation="Horizontal" >
+						<Label Name="labelWOSBAM" Width="82" FontWeight="Bold" />
+						<Label Width="82" />
+						<Label Name="labelWOSBPM" Width="82" FontWeight="Bold" />
+					</StackPanel>
+				<StackPanel Orientation="Horizontal">
+						<TextBox Name="textWOSBTime1" Width="82" />
+						<Label Name="labelWOSBTime2" Width="82" />
+						<TextBox Name="textWOSBTime2" Width="82" />
+					</StackPanel>
+				<StackPanel Orientation="Horizontal">
+						<TextBox Name="textWOSBTime3" Width="82" />
+						<Label Name="labelWOSBTime4" Width="82" />
+						<TextBox Name="textWOSBTime4" Width="82" />
+					</StackPanel>
+				<StackPanel Orientation="Horizontal">
+						<TextBox Name="textWOSBTime5" Width="82" />
+						<Label Name="labelWOSBTime6" Width="82" />
+						<TextBox Name="textWOSBTime6" Width="82" />
+					</StackPanel>
+				<StackPanel Orientation="Horizontal">
+						<TextBox Name="textWOSBTime7" Width="82" />
+						<Label Name="labelWOSBTime8" Width="82" />
+						<TextBox Name="textWOSBTime8" Width="82" />
+					</StackPanel>
+				<StackPanel Orientation="Horizontal">
+						<TextBox Name="textWOSBTime9" Width="82" />
+						<Label Name="labelWOSBTime10" Width="82" />
+						<TextBox Name="textWOSBTime10" Width="82" />
+					</StackPanel>
+				<StackPanel Orientation="Horizontal">
+						<TextBox Name="textWOSBTime11" Width="82" />
+						<Label Name="labelWOSBTime12" Width="82" />
+						<TextBox Name="textWOSBTime12" Width="82" />
+					</StackPanel>
+				<StackPanel Orientation="Horizontal">
+						<TextBox Name="textWOSBTime13"  Width="82" />
+						<Label Name="labelWOSBTime14" Width="82" />
+						<TextBox Name="textWOSBTime14" Width="82" />
+					</StackPanel>
+			</StackPanel>
+
+			<StackPanel Name="stackStep9" Visibility="Collapsed">
+				<CheckBox Name="checkSendFeedback" IsChecked="True" />
+				<Label Padding="0">
+					<TextBlock Name="TTSendFeedback" Style="{StaticResource Description}" />
+				</Label>
+			</StackPanel>
+
+			<StackPanel Name="stackStep10" Orientation="Horizontal" Visibility="Collapsed">
+				<Button Name="buttonSendMail" Click="buttonSendMail_Click" />
+				<Button Name="buttonHelp" Click="buttonHelp_Click" />
+				<Button Name="buttonDonate" Click="buttonDonate_Click" />
+			</StackPanel>
+			
+			<Label /><Label /><!--Platzhalter-->
+		</StackPanel>
+
+		<StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom">
+			<Button Click="buttonBack_Click" Content="&lt;Back&gt;" Name="buttonBack" Width="77" />
+			<Button Click="buttonNext_Click" Content="&lt;Next&gt;" Name="buttonNext" Width="77" />
+			<Button Click="buttonAbort_Click" Content="&lt;Skip/Abort&gt;" Name="buttonAbort" Width="77" />
+		</StackPanel>
+
+		<Grid.Resources>
+			<Style TargetType="{x:Type CheckBox}">
+				<Setter Property="Margin" Value="4,0,4,0" />
+				<Setter Property="FontSize" Value="13" />
+			</Style>
+			<Style TargetType="{x:Type Label}">
+				<Setter Property="FontSize" Value="13" />
+			</Style>
+			<Style TargetType="{x:Type Button}">
+				<Setter Property="Margin" Value="3" />
+			</Style>
+		</Grid.Resources>
+	</Grid>
+</Window>
