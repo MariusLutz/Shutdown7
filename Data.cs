@@ -27,7 +27,11 @@ namespace Shutdown7
 		public static string[] RemoteMacs = new string[0];
 		public static string RemotePassword = "";
 		public static int RemotePort = 0;
-		public static string curProfile;
+        public static string ProcessName = "", FileName = "", LaunchFile = "", NetworkAdapter = "";
+        public static int Network = 0, CpuValue = 90;
+        public static bool CpuMode;
+
+        public static string curProfile;
 
 		public static string ArgsServer = "";
 		public static string ArgsPassword = "";
@@ -279,7 +283,8 @@ namespace Shutdown7
 						L.Add("FadeEndVolume", "Endlautstärke (0 = Stille)");
 						L.Add("PlayNoise", "Spiele weißes Rauschen");
 						L.Add("Password", "Passwort");
-						L.Add("StartShutdownError", "Fehler aufgetreten beim Starten des Shutdowns.");
+                        L.Add("ResumeLastAction", "Letzten Auftrag fortsetzen");
+                        L.Add("StartShutdownError", "Fehler aufgetreten beim Starten des Shutdowns.");
 						L.Add("NoAndroidFound", "Kein angeschlossenes Android-Gerät gefunden.");
 
 						L.Add("RemoteConnect", "Verbinde");
@@ -509,6 +514,7 @@ namespace Shutdown7
 						L.Add("FadeStart", "Start fading after % of total duration");
 						L.Add("FadeEndVolume", "End volume (0 = silent)");
 						L.Add("PlayNoise", "Play white noise");
+                        L.Add("ResumeLastAction", "Resume last action");
 						L.Add("StartShutdownError", "Error occured while shutting down your computer.");
 						L.Add("NoAndroidFound", "No connected Android device found.");
 

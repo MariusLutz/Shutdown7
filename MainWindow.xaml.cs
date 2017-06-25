@@ -2,9 +2,9 @@
 /// Shutdown7
 /// (c) Marius Lutz
 /// Fährt Computer mit Unterstütztung der Windows 7 Features herunter.
-/// Version 2.3.2
+/// Version 2.3.X
 /// Windows XP, Windows Vista, Windows 7, Windows 8, Windows 10
-/// Oct 2009 - Jun 206
+/// Oct 2009 - Jun 2017
 /// www.shutdown7.com
 /// 
 /// Changelog:
@@ -225,6 +225,11 @@
 ///     WPF NotifyIcon updated to 1.0.8
 ///     -resolved tooltip bug
 ///     -systray disposed after execute
+/// 2.3.X XX
+///     New: Separate Data.t and twait Timespans for better handling
+///     New: Music Player Handling improved by introducing a Timer instead of a sleeping thread
+///     -does it fix the time calculation error?
+///     Fix: First Tick in Conditions Now, Time, Idle, Music immediately, not after 1 s
 ///	X.Y xx.yy.zz
 ///	
 ///	TODO:
@@ -306,20 +311,21 @@ namespace Shutdown7
 		private static extern bool GetLastInputInfo(ref LASTINPUTINFO plii);
 
 		string WOSBZeit;
-		int FadeTotalRunTime, startfade, total;
-		bool AtChecked, CpuMode, NetworkMode, ScreenOffChecked, PlayNoiseChecked;
-		double orgVolume, endVolume, length, percent;
+		int FadeTotalRunTime, startfade, /*length,*/ curSong;
+		bool AtChecked, /*CpuMode, */NetworkMode, ScreenOffChecked, PlayNoiseChecked;
+		double orgVolume, endVolume, percent;
 
 		public static string curRemoteServer, curRemoteIP, curRemotePassword, curRemoteMac;
-		public string ProcessName, FileName, LaunchFile, NetworkAdapter;
-		public static int curRemotePort, Cpu, Network, cpuHits, networkHits;
+		public static int curRemotePort, /*Cpu, Network,*/ cpuHits, networkHits;
 		public static bool remote;
+        TimeSpan twait;
 
 		TcpListener tcpListener;
 		TcpClient client;
 		ArrayList MusicFiles = new ArrayList();
 		DispatcherTimer Timer = new DispatcherTimer();
-		Thread MusicThread, NoiseThread;
+        DispatcherTimer MusicTimer;
+		Thread NoiseThread; //obsolete
 		MediaPlayer mp3, noise;
 		TaskbarIcon sysicon;
 		MenuItem contextRestore, contextAbort, contextShutdown, contextShutdown1, contextShutdown2, contextShutdown3, contextShutdown4, contextShutdown5, contextShutdown6, contextShutdown7, contextExit;
@@ -362,7 +368,7 @@ namespace Shutdown7
 			comboNetwork.Items.Add(Data.L["Up"]);
 			//labelNetworkBelow.Content = Data.L["Below"];
 			labelRemotePassword.Content = Data.L["Password"] + ": ";
-            //checkResumeLastAction.Content = Data.L[""]; TODO
+            checkResumeLastAction.Content = Data.L["ResumeLastAction"];
             checkScreenOff.Content = Data.L["ScreenOff"];
 			checkMusicFadeout.Content = Data.L["MusicFadeout"];
 			labelFade.Content = Data.L["FadeStart"];
@@ -414,37 +420,65 @@ namespace Shutdown7
 			}
             
             if (Data.S["ResumeLastAction"])
-                ResumeLastAction();
-        }
-
-        void ResumeLastAction()
-        {
-            //Read last settings
-            //Xml.ReadLastAction();
-
-            if (LastActionisValid())
             {
-                ApplyActiontoUI();
-                StartShutdown();
+                if (LastActionisValid())
+                {
+                    ApplyActiontoUI();
+                    StartShutdown();
+                }
+                else
+                    Message.Show("Last action not valid anymore.", "Error");
             }
         }
-
+        
         bool LastActionisValid()
         {
             switch (Data.Condition)
             {
                 case Data.Conditions.Time:
-                    if (Data.t.TotalSeconds < 5)
-                        return false;
-                    break;
                 case Data.Conditions.Idle:
-                    if (Data.t.TotalSeconds < 1)
+                    if (Data.t.TotalSeconds <= 3)
                         return false;
                     break;
                 case Data.Conditions.Process:
-                    //sure process is running
+                    // make sure process is running
+                    bool stop = true;
+                    if (Data.S["AllProcesses"])
+                    {
+                        foreach (Process p in Process.GetProcessesByName(Data.ProcessName))
+                        {
+                            if (p.ProcessName == Data.ProcessName)
+                            {
+                                stop = false;
+                                break;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        foreach (Process p in Process.GetProcesses())
+                        {
+                            if (p.MainWindowTitle == Data.ProcessName)
+                            {
+                                stop = false;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (!stop)
+                        comboProcesses.SelectedValue = Data.ProcessName;
+                    else
+                        return false;
+                    break;
                 case Data.Conditions.File:
                     //make sure file exists
+                    if (!File.Exists(Data.FileName))
+                        return false;
+                    break;
+                case Data.Conditions.Cpu:
+                    break;
+                case Data.Conditions.Music:
                 default:
                     return false;
             }
@@ -454,9 +488,9 @@ namespace Shutdown7
 
         void ApplyActiontoUI()
         {
-            //TODO: test robustness
-            comboModus.SelectedIndex = Convert.ToInt32(Data.Mode) - 1;
-            /*switch (Data.Mode)
+            //comboModus.SelectedIndex = Convert.ToInt32(Data.Mode) - 1;
+            
+            switch (Data.Mode)
             {
                 case Data.Modes.Shutdown:
                     comboModus.SelectedIndex = 0;
@@ -478,34 +512,48 @@ namespace Shutdown7
                 case Data.Modes.HibernateWOSB:
                     comboModus.SelectedIndex = 5;
                     break;
-                case Data.Modes.HibernateWOSBIni:
-                case Data.Modes.HibernateWOSBTime:
-                case Data.Modes.WakeOnLan:
                 case Data.Modes.Launch:
+                    textLaunchFile.Text = Data.LaunchFile;
+                    if (Data.S["WOSB"])
+                        comboModus.SelectedIndex = 8;
+                    else
+                        comboModus.SelectedIndex = 6;
+                    break;
+                case Data.Modes.HibernateWOSBIni:
+                    comboModus.SelectedIndex = 6;
+                    break;
+                case Data.Modes.HibernateWOSBTime:
+                    comboModus.SelectedIndex = 7;
+                    break;
+                case Data.Modes.WakeOnLan:
+                    if (Data.S["WOSB"])
+                        comboModus.SelectedIndex = 9;
+                    else
+                        comboModus.SelectedIndex = 7;
+                    break;
                 case Data.Modes.RestartAndroid:
                 default:
+                    comboModus.SelectedIndex = -1;
                     break;
-            }*/
+            }
 
             switch (Data.Condition)
             {
                 case Data.Conditions.Time:
                     radioTime.IsChecked = true;
                     In.IsChecked = true;
-                    hh.Value = Data.t.Hours; mm.Value = Data.t.Minutes; ss.Value = Data.t.Seconds;
+                    hh.Value = Data.t.Hours; mm.Value = Data.t.Minutes; ss.Value = Data.t.Seconds; // can you skip it since startshutdown/execute?
                     break;
                 case Data.Conditions.Process:
                     radioProcessClose.IsChecked = true;
-                    //if (ProcessExists(ProcessName)) comboProcesses.SelectedValue = ProcessName;
-                    Message.Show("Not supported (yet).");
                     break;
                 case Data.Conditions.File:
                     radioFileDelete.IsChecked = true;
-                    Message.Show("Not supported (yet).");
+                    textDeleteFile.Text = Data.FileName;
                     break;
                 case Data.Conditions.Music:
                     radioPlayMusic.IsChecked = true;
-                    Message.Show("Not supported (yet).");
+                    Message.Show("Not supported (yet).", "Warning");
                     break;
                 case Data.Conditions.Idle:
                     radioIdle.IsChecked = true;
@@ -513,7 +561,8 @@ namespace Shutdown7
                     break;
                 case Data.Conditions.Cpu:
                     radioCpu.IsChecked = true;
-                    Message.Show("Not supported (yet).");
+                    cpu.Value = Data.CpuValue;
+                    comboCpu.SelectedIndex = Data.CpuMode ? 0 : 1;
                     break;
                 //case Data.Conditions.None:
                 //case Data.Conditions.Now:
@@ -776,7 +825,7 @@ namespace Shutdown7
         }
         #endregion
 
-            #region Modus
+        #region Modus
         public void UpdateModus()
 		{
 			list = new List<CodeItem>();
@@ -935,13 +984,9 @@ namespace Shutdown7
 			}
 
 			if (Modus.Text == Data.L["LaunchFile"])
-			{
 				stackLaunchFile.Visibility = Visibility.Visible;
-			}
 			else
-			{
 				stackLaunchFile.Visibility = Visibility.Collapsed;
-			}
 
 		}
 
@@ -959,7 +1004,7 @@ namespace Shutdown7
 					if (fd.ShowDialog() == CommonFileDialogResult.Ok)
 					{
 						textLaunchFile.Text = fd.FileName;
-						LaunchFile = fd.FileName;
+                        Data.LaunchFile = fd.FileName;
 						buttonBrowseLaunchFile.IsEnabled = false;
 						buttonDeleteLaunchFile.IsEnabled = true;
 					}
@@ -975,7 +1020,7 @@ namespace Shutdown7
 					if ((bool)fd.ShowDialog())
 					{
 						textLaunchFile.Text = fd.FileName;
-						LaunchFile = fd.FileName;
+                        Data.LaunchFile = fd.FileName;
 						buttonBrowseLaunchFile.IsEnabled = false;
 						buttonDeleteLaunchFile.IsEnabled = true;
 					}
@@ -990,6 +1035,7 @@ namespace Shutdown7
 		private void buttonDeleteLaunchFile_Click(object sender, RoutedEventArgs e)
 		{
 			textLaunchFile.Text = "";
+            Data.LaunchFile = "";
 			buttonBrowseLaunchFile.IsEnabled = true;
 			buttonDeleteLaunchFile.IsEnabled = false;
 		}
@@ -1088,7 +1134,7 @@ namespace Shutdown7
 			try
 			{
 				if ((string)comboProcesses.SelectedItem != "")
-					ProcessName = e.AddedItems[0].ToString().Replace(".exe", "");
+                    Data.ProcessName = e.AddedItems[0].ToString().Replace(".exe", "");
 			}
 			catch { }
 		}
@@ -1108,7 +1154,7 @@ namespace Shutdown7
 					if (fd.ShowDialog() == CommonFileDialogResult.Ok)
 					{
 						textDeleteFile.Text = fd.FileName;
-						FileName = fd.FileName;
+                        Data.FileName = fd.FileName;
 						buttonBrowseDeleteFile.IsEnabled = false;
 						buttonDeleteDeleteFile.IsEnabled = true;
 					}
@@ -1124,7 +1170,7 @@ namespace Shutdown7
 					if ((bool)fd.ShowDialog())
 					{
 						textDeleteFile.Text = fd.FileName;
-						FileName = fd.FileName;
+                        Data.FileName = fd.FileName;
 						buttonBrowseDeleteFile.IsEnabled = false;
 						buttonDeleteDeleteFile.IsEnabled = true;
 					}
@@ -1139,6 +1185,7 @@ namespace Shutdown7
 		private void buttonDeleteDeleteFile_Click(object sender, RoutedEventArgs e)
 		{
 			textDeleteFile.Text = "";
+            Data.FileName = "";
 			buttonBrowseDeleteFile.IsEnabled = true;
 			buttonDeleteDeleteFile.IsEnabled = false;
 		}
@@ -1844,35 +1891,41 @@ namespace Shutdown7
 			}
 			#endregion
 
-			if ((Data.Condition == Data.Conditions.Time || Data.Condition == Data.Conditions.Idle || Data.Condition == Data.Conditions.Cpu || Data.Condition == Data.Conditions.Network) & Visibility == Visibility.Visible & !remote)
-			{
-				if (AtChecked && Data.Mode != Data.Modes.HibernateWOSBTime)
-				{
-					double ts = (int)(DateTime.Parse(hh.Value + ":" + mm.Value + ":" + ss.Value) - DateTime.Now).TotalSeconds;
-					if (ts < 0)
-						ts += TimeSpan.FromDays(1).TotalSeconds;
-					Data.t = TimeSpan.FromSeconds(ts);
+            if (!remote)
+                switch (Data.Condition)
+                {
+                    case Data.Conditions.Time:
+                    case Data.Conditions.Idle:
+                    case Data.Conditions.Cpu:
+                    case Data.Conditions.Network:
+                        if (AtChecked && Data.Mode != Data.Modes.HibernateWOSBTime)
+                        {
+                            Data.t = (DateTime.Parse(hh.Value + ":" + mm.Value + ":" + ss.Value) - DateTime.Now);
+                            if (Data.t.TotalSeconds < 0)
+                                Data.t = Data.t.Add(TimeSpan.FromDays(1));
+                            Data.t = new TimeSpan(Data.t.Ticks - (Data.t.Ticks % 10000000)); //Round milliseconds
+                            
+                            In.IsChecked = true;
+                        }
+                        else
+                            Data.t = TimeSpan.Parse(hh.Value + ":" + mm.Value + ":" + ss.Value);
 
-					//Data.t = DateTime.Parse(hh.Text + ":" + mm.Text + ":" + ss.Text) - DateTime.Now;
-					In.IsChecked = true;
-				}
-				else
-					Data.t = TimeSpan.Parse(hh.Value + ":" + mm.Value + ":" + ss.Value);
-					//Data.t = TimeSpan.Parse(hh.Text + ":" + mm.Text + ":" + ss.Text);
-
-				if (Data.Condition == Data.Conditions.Cpu)
-				{
-					CpuMode = (comboCpu.SelectedIndex == 0);	//True: Above, False: Below
-					Cpu = (int)cpu.Value;
-				}
-				else if (Data.Condition == Data.Conditions.Network)
-				{
-					NetworkMode = (comboNetwork.SelectedIndex == 0);	//True: Down, False: Up
-					Network = (int)network.Value;
-					NetworkAdapter = (string)comboNetworkAdapters.SelectedItem;
-				}
-			}
-
+                        if (Data.Condition == Data.Conditions.Cpu)
+                        {
+                            Data.CpuMode = (comboCpu.SelectedIndex == 0);   //True: Above, False: Below
+                            Data.CpuValue = (int)cpu.Value;
+                        }
+                        else if (Data.Condition == Data.Conditions.Network)
+                        {
+                            NetworkMode = (comboNetwork.SelectedIndex == 0);    //True: Down, False: Up
+                            Data.Network = (int)network.Value;
+                            Data.NetworkAdapter = (string)comboNetworkAdapters.SelectedItem;
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            
 			#region ThumbnailToolbar
 			if (Data.S["ThumbnailToolbar"])
 			{
@@ -1945,20 +1998,28 @@ namespace Shutdown7
 				Timer = new DispatcherTimer();
 			}
 
+            //Delete values from Condition variables
+            twait = TimeSpan.FromSeconds(0);
+            Data.ProcessName = "";
+            Data.FileName = "";
+            Data.LaunchFile = "";
+            Data.NetworkAdapter = "";
+            Data.Network = 0;
+
 			//Beende Musik
 			if (mp3 != null)
 			{
-				mp3.Stop();
+                mp3.Stop();
 				mp3 = null;
 			}
 			if (noise != null)
 			{
 				noise.Stop();
 				noise = null;
-			}
-			if (MusicThread != null/* & MusicThread.IsAlive*/)
-				MusicThread.Abort();
-			if (NoiseThread != null/* & MusicThread.IsAlive*/)
+            }
+            /*if (MusicThread != null)
+				MusicThread.Abort();*/
+			if (NoiseThread != null)
 				NoiseThread.Abort();
 
 			#region Systray
@@ -2008,6 +2069,11 @@ namespace Shutdown7
 			progressBar.IsIndeterminate = false;
 			labelStatus.Content = "";
 
+            //Restore original timespan to UI
+            hh.Value = Data.t.Hours;
+            mm.Value = Data.t.Minutes;
+            ss.Value = Data.t.Seconds;
+
 			#region Systray
 			if (Data.S["SysIcon"] & sysicon != null)
 			{
@@ -2035,36 +2101,39 @@ namespace Shutdown7
 				Dispatcher.Invoke((Action)delegate
 				{
 					LockUI();
-					switch (Data.Mode)
-					{
-						case Data.Modes.Shutdown:
-							comboModus.SelectedIndex = 0;
-							break;
-						case Data.Modes.Restart:
-							comboModus.SelectedIndex = 1;
-							break;
-						case Data.Modes.Logoff:
-							comboModus.SelectedIndex = 2;
-							break;
-						case Data.Modes.Lock:
-							comboModus.SelectedIndex = 3;
-							break;
-						case Data.Modes.Standby:
-						case Data.Modes.StandbyWOSB:
-							comboModus.SelectedIndex = 4;
-							break;
-						case Data.Modes.Hibernate:
-						case Data.Modes.HibernateWOSB:
-							comboModus.SelectedIndex = 5;
-							break;
-						case Data.Modes.HibernateWOSBIni:
-						case Data.Modes.HibernateWOSBTime:
-						case Data.Modes.WakeOnLan:
-						case Data.Modes.Launch:
-						case Data.Modes.RestartAndroid:
-						default:
-							break;
-					}
+                    //TODO: test robustness
+                    comboModus.SelectedIndex = Convert.ToInt32(Data.Mode) - 1;
+
+                    /*switch (Data.Mode)
+                    {
+                        case Data.Modes.Shutdown:
+                            comboModus.SelectedIndex = 0;
+                            break;
+                        case Data.Modes.Restart:
+                            comboModus.SelectedIndex = 1;
+                            break;
+                        case Data.Modes.Logoff:
+                            comboModus.SelectedIndex = 2;
+                            break;
+                        case Data.Modes.Lock:
+                            comboModus.SelectedIndex = 3;
+                            break;
+                        case Data.Modes.Standby:
+                        case Data.Modes.StandbyWOSB:
+                            comboModus.SelectedIndex = 4;
+                            break;
+                        case Data.Modes.Hibernate:
+                        case Data.Modes.HibernateWOSB:
+                            comboModus.SelectedIndex = 5;
+                            break;
+                        case Data.Modes.HibernateWOSBIni:
+                        case Data.Modes.HibernateWOSBTime:
+                        case Data.Modes.WakeOnLan:
+                        case Data.Modes.Launch:
+                        case Data.Modes.RestartAndroid:
+                        default:
+                            break;
+                    }*/
 
 					//Workaround
 					expanderMode.IsExpanded = false;
@@ -2128,7 +2197,7 @@ namespace Shutdown7
 								else
 									Baloontiptext = Data.L["BalloontipWindow" + Data.Mode.ToString()];
 
-								sysicon.ShowBalloonTip("Shutdown7", String.Format(Baloontiptext, ProcessName + (Data.S["AllProcesses"] ? ".exe" : "")), BalloonIcon.Info);
+								sysicon.ShowBalloonTip("Shutdown7", String.Format(Baloontiptext, Data.ProcessName + (Data.S["AllProcesses"] ? ".exe" : "")), BalloonIcon.Info);
 							});
 						}
 						#endregion
@@ -2145,7 +2214,7 @@ namespace Shutdown7
 							Dispatcher.BeginInvoke((Action)delegate
 							{
 								string Baloontiptext = Data.L["BalloontipFile" + Data.Mode.ToString()];
-								sysicon.ShowBalloonTip("Shutdown7", String.Format(Baloontiptext, FileName), BalloonIcon.Info);
+								sysicon.ShowBalloonTip("Shutdown7", String.Format(Baloontiptext, Data.FileName), BalloonIcon.Info);
 							});
 						}
 						#endregion
@@ -2169,26 +2238,37 @@ namespace Shutdown7
 						mp3 = new MediaPlayer();
 						mp3.Volume = orgVolume;
 
-						length = 0;
-						foreach (string fn in MusicFiles.ToArray(typeof(string)))
+                        Data.t = TimeSpan.FromTicks(0);
+						foreach (string fn in MusicFiles)
 						{
 							try
 							{
-								length += TagLib.File.Create(fn).Properties.Duration.TotalSeconds;
+                                Data.t = Data.t.Add(TagLib.File.Create(fn).Properties.Duration);
 							}
 							catch (Exception ex)
 							{
 								Message.Show(ex.Message + "\n" + fn, "Music", "Error");
 							}
 						}
-						Data.t = TimeSpan.FromSeconds(length);
+                        Data.t = new TimeSpan(Data.t.Ticks - (Data.t.Ticks % 10000000)); //Round milliseconds
+                        twait = Data.t;
 
-						Timer.Tick += new EventHandler(WaitMusicPlaying);
+                        Timer.Tick += new EventHandler(WaitMusicPlaying);
 
-						MusicThread = new Thread(new ParameterizedThreadStart(WaitMusicPlay));
-						MusicThread.Start(MusicFiles.ToArray(typeof(string)));
+                        //tick before wait
+                        Dispatcher.Invoke((Action)delegate
+                        {
+                            Title = Data.t.ToString();
+                        });
 
-						w2.Start();
+                        //Setup additional timer that manages music playback
+                        MusicTimer = new DispatcherTimer();
+                        curSong = 0;
+                        MusicTimer.Interval = TimeSpan.FromSeconds(0);
+                        MusicTimer.Tick += new EventHandler(WaitMusicPlayNextSong);
+                        MusicTimer.Start();
+                        
+                        w2.Start();
 
 						#region Systray
 						if (Data.S["SysIcon"])
@@ -2228,7 +2308,7 @@ namespace Shutdown7
 						#endregion
 						break;
 					case Data.Conditions.Cpu:
-						if (/*total*/Data.t.TotalSeconds > 0 && Data.Mode != Data.Modes.HibernateWOSBTime)
+						if (Data.t.TotalSeconds > 0 && Data.Mode != Data.Modes.HibernateWOSBTime)
 						{
 							progressBar.IsIndeterminate = true;
 							Win7.ProgressType("Indeterminate", this);
@@ -2247,7 +2327,7 @@ namespace Shutdown7
 								Dispatcher.BeginInvoke((Action)delegate
 								{
 									string Baloontiptext = Data.L["BalloontipCpu" + Data.Mode.ToString()];
-									sysicon.ShowBalloonTip("Shutdown7", String.Format(Baloontiptext, (CpuMode ? Data.L["Above"] : Data.L["Below"]).ToLower(), Cpu, ((Data.t.Hours < 10) ? "0" : "") + Data.t.Hours + ":" + ((Data.t.Minutes < 10) ? "0" : "") + Data.t.Minutes + ":" + ((Data.t.Seconds < 10) ? "0" : "") + Data.t.Seconds), BalloonIcon.Info);
+									sysicon.ShowBalloonTip("Shutdown7", String.Format(Baloontiptext, (Data.CpuMode ? Data.L["Above"] : Data.L["Below"]).ToLower(), Data.CpuValue, ((Data.t.Hours < 10) ? "0" : "") + Data.t.Hours + ":" + ((Data.t.Minutes < 10) ? "0" : "") + Data.t.Minutes + ":" + ((Data.t.Seconds < 10) ? "0" : "") + Data.t.Seconds), BalloonIcon.Info);
 								});
 							}
 							#endregion
@@ -2267,34 +2347,48 @@ namespace Shutdown7
 							Dispatcher.BeginInvoke((Action)delegate
 							{
 								string Baloontiptext = Data.L["BalloontipNetwork" + Data.Mode.ToString()];
-								sysicon.ShowBalloonTip("Shutdown7", String.Format(Baloontiptext, (NetworkMode ? Data.L["Down"] : Data.L["Up"]).ToLower(), Network, ((Data.t.Hours < 10) ? "0" : "") + Data.t.Hours + ":" + ((Data.t.Minutes < 10) ? "0" : "") + Data.t.Minutes + ":" + ((Data.t.Seconds < 10) ? "0" : "") + Data.t.Seconds), BalloonIcon.Info);
+								sysicon.ShowBalloonTip("Shutdown7", String.Format(Baloontiptext, (NetworkMode ? Data.L["Down"] : Data.L["Up"]).ToLower(), Data.Network, ((Data.t.Hours < 10) ? "0" : "") + Data.t.Hours + ":" + ((Data.t.Minutes < 10) ? "0" : "") + Data.t.Minutes + ":" + ((Data.t.Seconds < 10) ? "0" : "") + Data.t.Seconds), BalloonIcon.Info);
 							});
 						}
 						#endregion
 						break;
 					case Data.Conditions.Time:
-						total = (int)Data.t.TotalSeconds;		//Wird gebraucht für Prozent-Berechnung in WaitTime
-						if (/*total*/Data.t.TotalSeconds > 0 && Data.Mode != Data.Modes.HibernateWOSBTime)
+                        twait = Data.t;
+						if (Data.t.TotalSeconds > 0 && Data.Mode != Data.Modes.HibernateWOSBTime)
 						{
-							Timer.Tick += new EventHandler(WaitTime);
+                            Timer.Tick += new EventHandler(WaitTime);
 
-							#region Systray
-							if (Data.S["SysIcon"] && sysicon != null)
-							{
-								Dispatcher.BeginInvoke((Action)delegate
-								{
-									string Baloontiptext = Data.L["BalloontipTime" + Data.Mode.ToString()];
-									sysicon.ShowBalloonTip("Shutdown7", String.Format(Baloontiptext, ((Data.t.Hours < 10) ? "0" : "") + Data.t.Hours + ":" + ((Data.t.Minutes < 10) ? "0" : "") + Data.t.Minutes + ":" + ((Data.t.Seconds < 10) ? "0" : "") + Data.t.Seconds), BalloonIcon.Info);
-								});
-							}
-							#endregion
-						}
-						else
-							Shutdown();
+                            //tick before wait
+                            Dispatcher.Invoke((Action)delegate
+                            {
+                                Title = Data.t.ToString();
+                            });
+
+                            #region Systray
+                            if (Data.S["SysIcon"] && sysicon != null)
+                            {
+                                Dispatcher.BeginInvoke((Action)delegate
+                                {
+                                    string Baloontiptext = Data.L["BalloontipTime" + Data.Mode.ToString()];
+                                    sysicon.ShowBalloonTip("Shutdown7", String.Format(Baloontiptext, ((Data.t.Hours < 10) ? "0" : "") + Data.t.Hours + ":" + ((Data.t.Minutes < 10) ? "0" : "") + Data.t.Minutes + ":" + ((Data.t.Seconds < 10) ? "0" : "") + Data.t.Seconds), BalloonIcon.Info);
+                                });
+                            }
+                            #endregion
+                        }
+                        else
+                        {
+                            Dispatcher.Invoke((Action)delegate
+                            {
+                                Title = Data.t.ToString();
+                                progressBar.Value = 100;
+                            });
+                            Shutdown();
+                        }
 						break;
 					default: //ModeNow
 						Data.t = TimeSpan.FromSeconds(0);
-						Timer = null;
+                        twait = Data.t;
+                        Timer = null;
 						Shutdown();
 						return;
 				}
@@ -2343,14 +2437,16 @@ namespace Shutdown7
 				if (AtChecked && Data.Mode != Data.Modes.HibernateWOSBTime)
 				{
 					Data.t = DateTime.Parse(hh.Value + ":" + mm.Value + ":" + ss.Value) - DateTime.Now;
-					//Data.t = DateTime.Parse(hh.Text + ":" + mm.Text + ":" + ss.Text) - DateTime.Now;
-					In.IsChecked = true;
+                    //Data.t = DateTime.Parse(hh.Text + ":" + mm.Text + ":" + ss.Text) - DateTime.Now;
+                    twait = Data.t;
+                    In.IsChecked = true;
 				}
 				else
 					Data.t = TimeSpan.Parse(hh.Value + ":" + mm.Value + ":" + ss.Value);
-					//Data.t = TimeSpan.Parse(hh.Text + ":" + mm.Text + ":" + ss.Text);
-				
-				new Thread(RemoteClientStart).Start();
+                    twait = Data.t;
+                    //Data.t = TimeSpan.Parse(hh.Text + ":" + mm.Text + ":" + ss.Text);
+
+                new Thread(RemoteClientStart).Start();
 				#endregion
 			}
 
@@ -2638,7 +2734,7 @@ namespace Shutdown7
 
 					break;
 				case Data.Modes.Launch:
-					Shutdown.StartInfo.FileName = LaunchFile;
+					Shutdown.StartInfo.FileName = Data.LaunchFile;
 					Shutdown.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
 					Shutdown.StartInfo.Verb = "";
 
@@ -2764,8 +2860,9 @@ namespace Shutdown7
 		#region Wait
 		void WaitTime(object sender, EventArgs e)
 		{
-			if ((int)Data.t.TotalSeconds == 0)
-			{
+			if (twait.TotalSeconds.Equals(0))
+            //if ((int)Data.t.TotalSeconds == 0)
+                {
 				Timer.Stop();
 				if (Visibility == Visibility.Visible)
 				{
@@ -2776,25 +2873,31 @@ namespace Shutdown7
 				return;
 			}
 
-			Data.t = Data.t.Subtract(TimeSpan.FromSeconds(1));
-			percent = 100 - (Data.t.TotalSeconds / total) * 100;
+            twait = twait.Subtract(TimeSpan.FromSeconds(1));
+            //Data.t = Data.t.Subtract(TimeSpan.FromSeconds(1));
+			percent = 100 - (twait.TotalSeconds / Data.t.TotalSeconds) * 100;
 
 			#region Form
 			Dispatcher.Invoke((Action)delegate
 			{
-				Title = Data.t.ToString();
+				Title = twait.ToString();
 				progressBar.Value = percent;
-				ss.Value = Data.t.Seconds;
-				mm.Value = Data.t.Minutes;
-				hh.Value = Data.t.Hours;
-				
-				/*ss.Text = t.Seconds.ToString();
+				ss.Value = twait.Seconds;
+				mm.Value = twait.Minutes;
+				hh.Value = twait.Hours;
+                /*Title = Data.t.ToString();
+                progressBar.Value = percent;
+                ss.Value = Data.t.Seconds;
+                mm.Value = Data.t.Minutes;
+                hh.Value = Data.t.Hours;*/
+
+                /*ss.Text = t.Seconds.ToString();
 				mm.Text = t.Minutes.ToString();
 				hh.Text = t.Hours.ToString();
 				if (hh.Text.Length == 1) hh.Text = "0" + hh.Text;
 				if (mm.Text.Length == 1) mm.Text = "0" + mm.Text;
 				if (ss.Text.Length == 1) ss.Text = "0" + ss.Text;*/
-			});
+            });
 			#endregion
 			
 			if (Visibility == Visibility.Visible)
@@ -2858,28 +2961,35 @@ namespace Shutdown7
 
 			#region Systray
 			if (Data.S["SysIcon"] && sysicon != null)
-				sysicon.ToolTipText = ((Data.t.Hours < 10) ? "0" : "") + Data.t.Hours + ":" + ((Data.t.Minutes < 10) ? "0" : "") + Data.t.Minutes + ":" + ((Data.t.Seconds < 10) ? "0" : "") + Data.t.Seconds;
-			#endregion
-		}
+				sysicon.ToolTipText = ((twait.Hours < 10) ? "0" : "") + twait.Hours + ":" + ((twait.Minutes < 10) ? "0" : "") + twait.Minutes + ":" + ((twait.Seconds < 10) ? "0" : "") + twait.Seconds;
+            //sysicon.ToolTipText = ((Data.t.Hours < 10) ? "0" : "") + Data.t.Hours + ":" + ((Data.t.Minutes < 10) ? "0" : "") + Data.t.Minutes + ":" + ((Data.t.Seconds < 10) ? "0" : "") + Data.t.Seconds;
+            #endregion
+        }
 
 		void WaitProcessClose(object sender, EventArgs e)
 		{
 			bool stop = true;
 			if (Data.S["AllProcesses"])
 			{
-				foreach (Process p in Process.GetProcessesByName(ProcessName))
+				foreach (Process p in Process.GetProcessesByName(Data.ProcessName))
 				{
-					if (p.ProcessName == ProcessName)
-						stop = false;
+					if (p.ProcessName == Data.ProcessName)
+                    {
+                        stop = false;
+                        break;
+                    }
 				}
 			}
 			else
 			{
 				foreach (Process p in Process.GetProcesses())
 				{
-					if (p.MainWindowTitle == ProcessName)
-						stop = false;
-				}
+					if (p.MainWindowTitle == Data.ProcessName)
+                    {
+                        stop = false;
+                        break;
+                    }
+                }
 			}
 
 			if (stop)
@@ -2896,7 +3006,7 @@ namespace Shutdown7
 
 		void WaitFileDelete(object sender, EventArgs e)
 		{
-			if (!File.Exists(FileName))
+			if (!File.Exists(Data.FileName))
 			{
 				Timer.Stop();
 				if (Visibility == Visibility.Visible)
@@ -2910,9 +3020,9 @@ namespace Shutdown7
 
 		void WaitMusicPlaying(object sender, EventArgs e)
 		{
-			if ((int)Data.t.TotalSeconds == 0)
-			{
-				w3.Stop(); w5.Stop();
+            if (twait.TotalSeconds.Equals(0))
+            {
+                w3.Stop(); w5.Stop();
 				Timer.Stop();
 				if (Visibility == Visibility.Visible)
 				{
@@ -2921,21 +3031,21 @@ namespace Shutdown7
 				}
 
 				if (Data.debug_verbose)
-					Message.Show("Songlänge: " + (int)length + "\nPlaythread:" + (int)w2.Elapsed.TotalSeconds + "\nWaitthread:" + (int)w3.Elapsed.TotalSeconds + "\nUnterschied:" + (int)w5.Elapsed.TotalSeconds);
+					Message.Show("Songlängen total: " + Data.t.ToString() + "\nPlaythread:" + (int)w2.Elapsed.TotalSeconds + "\nWaitthread:" + (int)w3.Elapsed.TotalSeconds + "\nUnterschied:" + (int)w5.Elapsed.TotalSeconds);
 				
 				Shutdown();
 			}
 
-			Data.t = Data.t.Subtract(TimeSpan.FromSeconds(1));
-			double _t = length - Data.t.TotalSeconds;
-			percent = (_t / length) * 100;
+			twait = twait.Subtract(TimeSpan.FromSeconds(1));
+            TimeSpan _t = Data.t.Subtract(twait);
+			percent = (_t.TotalSeconds / Data.t.TotalSeconds) * 100;
 
 			if (Visibility == Visibility.Visible)
 			{
 				#region Form
 				Dispatcher.BeginInvoke((Action)delegate
 				{
-					Title = TimeSpan.FromSeconds((int)length - (int)_t).ToString();
+					Title = twait.ToString();
 					progressBar.Value = percent;
 					hh.Value = Data.t.Hours;
 					ss.Value = Data.t.Seconds;
@@ -3010,7 +3120,7 @@ namespace Shutdown7
 				if (percent >= startfade & !Data.debug_mute)
 				{
 					FadeTotalRunTime++;
-					double FadeTime = length - length * startfade / 100;
+					double FadeTime = Data.t.TotalSeconds - Data.t.TotalSeconds * startfade / 100;
 					double FadeVolumeAdj = (orgVolume - endVolume) / FadeTime;
 					double NewVol = orgVolume - (FadeVolumeAdj * FadeTotalRunTime);
 
@@ -3030,37 +3140,29 @@ namespace Shutdown7
 		}
 
 		#region Musik-Hilfsfunktion
-		void WaitMusicPlay(object items)
-		{
-			//w2.Start();
-			foreach (string fn in (string[])items)
-			{
-				if (!Timer.IsEnabled) return;
-				
-				Dispatcher.Invoke((Action)delegate
-				{
-					if (Data.debug_mute) mp3.Volume = 0;
-					mp3.Open(new Uri(fn));
-					mp3.Play();
-				});
+        void WaitMusicPlayNextSong(object sender, EventArgs e)
+        {
+            //Softer transition
+            Thread.Sleep(500);
+            ((DispatcherTimer)sender).Stop();
+            mp3.Stop();
+            mp3.Close();
 
-				Thread.Sleep((int)TagLib.File.Create(fn).Properties.Duration.TotalMilliseconds);
-				
-				if (!Timer.IsEnabled) return;
+            if (Data.debug_mute) mp3.Volume = 0;
+            mp3.Open(new Uri((string)MusicFiles[curSong]));
+            mp3.Play();
 
-				Dispatcher.Invoke((Action)delegate
-				{
-					mp3.Stop();
-					mp3.Close();
-				});
-			}
-			w2.Stop();
-			w5.Start();
+            curSong++;
 
-			//Shutdown();
-		}
+            //This was the last song
+            if (curSong == MusicFiles.Count)
+                return;
 
-		void PlayNoise()
+            ((DispatcherTimer)sender).Interval = TagLib.File.Create((string)MusicFiles[curSong]).Properties.Duration;
+            ((DispatcherTimer)sender).Start();
+        }
+
+            void PlayNoise()
 		{
 			do
 			{
@@ -3128,10 +3230,10 @@ namespace Shutdown7
 		{
 			int cpuusage = GetCpu();
 			bool conditionCpu;
-			if (CpuMode)
-				conditionCpu = cpuusage > Cpu;
+			if (Data.CpuMode)
+				conditionCpu = cpuusage > Data.CpuValue;
 			else
-				conditionCpu = cpuusage < Cpu;
+				conditionCpu = cpuusage < Data.CpuValue;
 			//bool conditionCpu = CpuMode ? cpuusage > Cpu : cpuusage < Cpu;	//Geht nicht :(
 
 			if (conditionCpu)
@@ -3174,7 +3276,7 @@ namespace Shutdown7
 		{
 			int networkusage = GetNetwork(NetworkMode);
 
-			if (networkusage < Network)
+			if (networkusage < Data.Network)
 			{
 				networkHits++;
 
@@ -3212,7 +3314,7 @@ namespace Shutdown7
 
 			foreach (NetworkInterface ni in interfaces)
 			{
-				if (ni.Name != NetworkAdapter)
+				if (ni.Name != Data.NetworkAdapter)
 					continue;
 
 				IPv4InterfaceStatistics s = ni.GetIPv4Statistics();
@@ -3391,11 +3493,11 @@ namespace Shutdown7
 					if (Input.StartsWith("GET /?abort"))
 					{
 						StopShutdown();
-						buffer = new ASCIIEncoding().GetBytes(Remote.GetWebUI(Timer, ProcessName, FileName, listMusicFiles.Items, true));
+						buffer = new ASCIIEncoding().GetBytes(Remote.GetWebUI(Timer, Data.ProcessName, Data.FileName, listMusicFiles.Items, true));
 					}
 					else
 					{
-						buffer = new ASCIIEncoding().GetBytes(Remote.GetWebUI(Timer, ProcessName, FileName, listMusicFiles.Items, false));
+						buffer = new ASCIIEncoding().GetBytes(Remote.GetWebUI(Timer, Data.ProcessName, Data.FileName, listMusicFiles.Items, false));
 					}
 					clientStream.Write(buffer, 0, buffer.Length);
 					clientStream.Flush();
@@ -3578,7 +3680,7 @@ namespace Shutdown7
 			switch (mode)
 			{
 				case Data.Modes.Launch:
-					return LaunchFile;
+					return Data.LaunchFile;
 				default:
 					return null;
 			}
@@ -3595,16 +3697,16 @@ namespace Shutdown7
 				case Data.Conditions.Idle:
 					return Data.t.TotalSeconds.ToString();
 				case Data.Conditions.File:
-					return FileName;
+					return Data.FileName;
 				case Data.Conditions.Process:
-					return ProcessName + (Data.S["AllProcesses"] ? ".exe" : "");
+					return Data.ProcessName + (Data.S["AllProcesses"] ? ".exe" : "");
 				case Data.Conditions.Music:
 					string files = "";
 					foreach (string curfile in MusicFiles)
 						files += curfile.Substring(curfile.LastIndexOf("\\") + 1) + "?";
-					return (int)length + "*" + files;
+					return (int)Data.t.TotalSeconds + "*" + files;
 				case Data.Conditions.Cpu:
-					return Data.t.TotalSeconds.ToString() + "?" + Cpu.ToString() + "?" + CpuMode;
+					return Data.t.TotalSeconds.ToString() + "?" + Data.CpuValue.ToString() + "?" + Data.CpuMode;
 				default:
 					return null;
 			}

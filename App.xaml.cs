@@ -384,12 +384,12 @@ namespace Shutdown7
 				if (File.Exists(CommandLine["e"]))
 				{
 					Data.Mode =  Data.Modes.Launch;
-					mainwindow.LaunchFile = CommandLine["e"];
+					Data.LaunchFile = CommandLine["e"];
 				}
 				else if (File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.System) + "\\" + CommandLine["e"]))
 				{
 					Data.Mode = Data.Modes.Launch;
-					mainwindow.LaunchFile = Environment.GetFolderPath(Environment.SpecialFolder.System) + "\\" + CommandLine["e"];
+					Data.LaunchFile = Environment.GetFolderPath(Environment.SpecialFolder.System) + "\\" + CommandLine["e"];
 				}
 			}
 

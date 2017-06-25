@@ -5,13 +5,13 @@
         xmlns:Properties="clr-namespace:Shutdown7.Properties"
         
 		Name="Main" Title="Shutdown7" Icon="/Shutdown7;component/Resources/Shutdown7.ico"
-		SizeToContent="WidthAndHeight" ResizeMode="CanMinimize" MinWidth="250"
+		SizeToContent="WidthAndHeight" ResizeMode="CanMinimize"
 		ContentRendered="Main_ContentRendered" Initialized="Main_Initialized"
         WindowState="{Binding WindowState, Source={x:Static Properties:Settings.Default}, Mode=TwoWay}"
         Left="{Binding WindowLeft, Source={x:Static Properties:Settings.Default}, Mode=TwoWay}"
         Top="{Binding WindowTop, Source={x:Static Properties:Settings.Default}, Mode=TwoWay}"
         >
-    <Grid Margin="2">
+    <Grid Margin="2" Width="250">
 		<StackPanel Margin="0,0,0,20">
 			<ComboBox Name="comboModus">
 				<ComboBox.ItemTemplate>
@@ -58,7 +58,7 @@
 						</StackPanel>
 					</StackPanel>
 					<StackPanel Name="stackFile" Visibility="Collapsed">
-						<TextBox Name="textDeleteFile" IsReadOnly="True" AllowDrop="True" TextChanged="textDeleteFile_TextChanged" PreviewDragEnter="textDeleteFile_PreviewDragEnter" PreviewDragOver="textDeleteFile_PreviewDragEnter" PreviewDrop="textDeleteFile_PreviewDrop" />
+						<TextBox Name="textDeleteFile" TextWrapping="Wrap" IsReadOnly="True" AllowDrop="True" TextChanged="textDeleteFile_TextChanged" PreviewDragEnter="textDeleteFile_PreviewDragEnter" PreviewDragOver="textDeleteFile_PreviewDragEnter" PreviewDrop="textDeleteFile_PreviewDrop" />
 						<StackPanel Orientation="Horizontal">
 							<Button Name="buttonBrowseDeleteFile" Content="" Width="99" Click="buttonBrowseDeleteFile_Click" />
 							<Button Name="buttonDeleteDeleteFile" Content="" Width="99" IsEnabled="False" Click="buttonDeleteDeleteFile_Click" />
@@ -69,7 +69,7 @@
 					</StackPanel>
 					<StackPanel Name="stackMusic" Visibility="Collapsed">
 						<ScrollViewer Name="scrollMusicFiles" VerticalScrollBarVisibility="Auto">
-							<ListBox Name="listMusicFiles" Visibility="Collapsed" SelectionChanged="listMusicFiles_SelectionChanged" />
+							<ListBox Name="listMusicFiles" MaxHeight="150" Visibility="Collapsed" SelectionChanged="listMusicFiles_SelectionChanged" />
 						</ScrollViewer>
 						<StackPanel Orientation="Horizontal">
 							<Button Name="buttonBrowseMusicFile" Content="&lt;Browse&gt;" Width="74" Click="buttonBrowseMusicFile_Click" />
@@ -124,7 +124,6 @@
 			<Expander Header="&lt;Settings&gt;" Name="expanderSettings">
                 <StackPanel>
                     <CheckBox Content="&lt;Resume Last Action&gt;" Name="checkResumeLastAction" Checked="checkResumeLastAction_Checked" />
-                    <Separator />
                     <CheckBox Content="&lt;Screen Off&gt;" Name="checkScreenOff" />
 					<Separator />
 					<CheckBox Content="&lt;Play Noise&gt;" Name="checkPlayNoise" IsEnabled="False" Checked="checkPlayNoise_Checked" Unchecked="checkPlayNoise_Unchecked" />

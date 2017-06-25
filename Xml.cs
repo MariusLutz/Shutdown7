@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Windows;
 using System.Xml;
 
@@ -14,7 +15,11 @@ namespace Shutdown7
 		{
 			try
 			{
+                if (!File.Exists(Path))
+                    throw new FileNotFoundException();
+                
 				XmlTextReader Reader = new XmlTextReader(Path);
+                
 				Reader.Read(); Reader.Read(); //xml Deklaration überspringen
 
 				XmlNodeType curType;
@@ -75,6 +80,27 @@ namespace Shutdown7
                                     break;
                                 case "t":
                                     Data.t = TimeSpan.FromSeconds(Int32.Parse(curValue));
+                                    break;
+                                case "ProcessName":
+                                    Data.ProcessName = curValue;
+                                    break;
+                                case "FileName":
+                                    Data.FileName = curValue;
+                                    break;
+                                case "LaunchFile":
+                                    Data.LaunchFile = curValue;
+                                    break;
+                                case "NetworkAdapter":
+                                    Data.NetworkAdapter = curValue;
+                                    break;
+                                case "Network":
+                                    Data.NetworkAdapter = curValue;
+                                    break;
+                                case "CpuValue":
+                                    Data.CpuValue = Int32.Parse(curValue);
+                                    break;
+                                case "CpuMode":
+                                    Data.CpuMode = Boolean.Parse(curValue);
                                     break;
                                 default:
                                     if (Data.S.ContainsKey(curName))
@@ -163,6 +189,34 @@ namespace Shutdown7
                 Writer.WriteValue(Data.t.TotalSeconds);
                 Writer.WriteEndElement();
 
+                Writer.WriteStartElement("ProcessName");
+                Writer.WriteValue(Data.ProcessName);
+                Writer.WriteEndElement();
+
+                Writer.WriteStartElement("FileName");
+                Writer.WriteValue(Data.FileName);
+                Writer.WriteEndElement();
+
+                Writer.WriteStartElement("LaunchFile");
+                Writer.WriteValue(Data.LaunchFile);
+                Writer.WriteEndElement();
+
+                Writer.WriteStartElement("NetworkAdapter");
+                Writer.WriteValue(Data.NetworkAdapter);
+                Writer.WriteEndElement();
+
+                Writer.WriteStartElement("Network");
+                Writer.WriteValue(Data.Network);
+                Writer.WriteEndElement();
+
+                Writer.WriteStartElement("CpuValue");
+                Writer.WriteValue(Data.CpuValue);
+                Writer.WriteEndElement();
+
+                Writer.WriteStartElement("CpuMode");
+                Writer.WriteValue(Data.CpuMode);
+                Writer.WriteEndElement();
+                
                 Writer.WriteEndElement();
 
                 Writer.WriteEndElement();
